@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="css/style.css">
+    <title>Checkout - Analytics Shop</title>
+</head>
+<body>
+    <nav id="global-nav">
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="plp.html">Shop</a>
+        <a href="cart.html">Cart</a>
+    </div>
+    <div class="auth-links" id="auth-ui">
+        </div>
+</nav>
+
+<script src="js/auth.js"></script>
+<script>
+    function renderNav() {
+        const authUI = document.getElementById('auth-ui');
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (user) {
+            let adminLink = user.role === 'admin' ? `<a href="admin/dashboard.html" style="color: #ff9900;">Back Office</a>` : '';
+            authUI.innerHTML = `
+                ${adminLink}
+                <span style="color: white; margin: 0 10px;">Hi, ${user.email.split('@')[0]}</span>
+                <a href="#" onclick="auth.logout()">Logout</a>
+            `;
+        } else {
+            authUI.innerHTML = `
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>
+            `;
+        }
+    }
+    renderNav();
+</script>
+
+    <div style="background: #f5f5f5; padding: 12px 0; border-bottom: 1px solid #ddd;">
+        <div class="container" style="font-size: 0.9rem; color: #666;">
+            <a href="index.html" style="color: #007185; text-decoration: none;">Home</a>
+            <span style="margin: 0 8px;">/</span>
+            <a href="cart.html" style="color: #007185; text-decoration: none;">Cart</a>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #333; font-weight: bold;">Checkout</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Checkout</h2>
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; margin-top: 30px;">
+            <!-- Checkout Form -->
+            <div>
+                <form id="checkout-form" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <h3 style="color: #232f3e; margin-bottom: 20px;">Billing & Shipping Information</h3>
+                    <div style="margin-bottom: 15px;"><label style="display: block; font-weight: bold; margin-bottom: 5px;">Full Name *</label><input type="text" id="fullName" placeholder="John Doe" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"></div>
+                    <div style="margin-bottom: 15px;"><label style="display: block; font-weight: bold; margin-bottom: 5px;">Email *</label><input type="email" id="email" placeholder="john@example.com" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"></div>
+                    <div style="margin-bottom: 15px;"><label style="display: block; font-weight: bold; margin-bottom: 5px;">Phone *</label><input type="tel" id="phone" placeholder="+1 (555) 123-4567" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"></div>
+                    <div style="margin-bottom: 15px;"><label style="display: block; font-weight: bold; margin-bottom: 5px;">Address *</label><input type="text" id="address" placeholder="123 Main Street" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;"><div><label style="display: block; font-weight: bold; margin-bottom: 5px;">City *</label><input type="text" id="city" placeholder="New York" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"></div><div><label style="display: block; font-weight: bold; margin-bottom: 5px;">State *</label><input type="text" id="state" placeholder="NY" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"></div></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;"><div><label style="display: block; font-weight: bold; margin-bottom: 5px;">ZIP *</label><input type="text" id="zip" placeholder="10001" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"></div><div><label style="display: block; font-weight: bold; margin-bottom: 5px;">Country *</label><input type="text" id="country" placeholder="United States" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"></div></div>
+                    <hr style="margin: 25px 0;">
+                    <h3 style="color: #232f3e; margin-bottom: 20px;">Payment Method</h3>
+                    <div style="margin-bottom: 15px;"><label style="display: block; font-weight: bold; margin-bottom: 5px;">Type *</label><select id="payment" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"><option value="">Select Payment Method</option><option value="credit_card">Credit Card</option><option value="debit_card">Debit Card</option><option value="paypal">PayPal</option><option value="apple_pay">Apple Pay</option><option value="google_pay">Google Pay</option><option value="boyfriend">Boyfriend</option></select></div>
+                    <div id="card-fields" style="display: none;"><div style="margin-bottom: 15px;"><label style="display: block; font-weight: bold; margin-bottom: 5px;">Card Number</label><input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><div><label style="display: block; font-weight: bold; margin-bottom: 5px;">Expiry</label><input type="text" id="expiry" placeholder="MM/YY" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"></div><div><label style="display: block; font-weight: bold; margin-bottom: 5px;">CVV</label><input type="text" id="cvv" placeholder="123" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"></div></div></div>
+                    <button type="submit" class="btn" style="width: 100%; margin-top: 25px; padding: 12px; background: #FF9900; font-size: 1.1rem; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; color: white;">Place Order</button>
+                </form>
+            </div>
+
+            <!-- Order Summary Sidebar -->
+            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: fit-content; position: sticky; top: 20px;">
+                <h3 style="color: #232f3e; margin-bottom: 20px;">Order Summary</h3>
+                <div id="checkout-items" style="margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 20px; max-height: 400px; overflow-y: auto;"></div>
+                <div style="text-align: right;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold;"><span>Subtotal:</span><span>$<span id="subtotal">0</span></span></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold;"><span>Shipping:</span><span>$0</span></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 1.3rem; color: #B12704; font-weight: bold; padding-top: 10px; border-top: 2px solid #ddd;"><span>Total:</span><span>$<span id="checkout-total">0</span></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/analytics.js"></script>
+    <script src="js/cart-logic.js"></script>
+    <script src="js/db-manager.js"></script>
+    <script>
+        digitalData.page = { 
+            pageName: "checkout_start", 
+            pageType: "checkout" 
+        };
+        
+        // Adobe Analytics: Track scCheckout event
+        analytics.trackPageView();
+
+        // Display cart items on checkout page
+        function displayCheckoutSummary() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const itemsContainer = document.getElementById('checkout-items');
+            const totalSpan = document.getElementById('checkout-total');
+            const subtotalSpan = document.getElementById('subtotal');
+            
+            let total = 0;
+            itemsContainer.innerHTML = cart.map(item => {
+                const itemTotal = item.price * (item.quantity || 1);
+                total += itemTotal;
+                return `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem;">
+                        <div><strong>${item.name}</strong><br><small>Qty: ${item.quantity || 1}</small></div>
+                        <div style="text-align: right;"><strong>$${itemTotal.toFixed(2)}</strong></div>
+                    </div>
+                `;
+            }).join('');
+            
+            totalSpan.innerText = total.toFixed(2);
+            subtotalSpan.innerText = total.toFixed(2);
+        }
+        displayCheckoutSummary();
+
+        // Auto-fill form with saved user shipping information
+        function autoFillShippingInfo() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (user) {
+                const savedShippingInfo = DBManager.getUserShippingInfo(user.email);
+                if (savedShippingInfo) {
+                    document.getElementById('fullName').value = savedShippingInfo.fullName || '';
+                    document.getElementById('email').value = savedShippingInfo.email || '';
+                    document.getElementById('phone').value = savedShippingInfo.phone || '';
+                    document.getElementById('address').value = savedShippingInfo.address || '';
+                    document.getElementById('city').value = savedShippingInfo.city || '';
+                    document.getElementById('state').value = savedShippingInfo.state || '';
+                    document.getElementById('zip').value = savedShippingInfo.zip || '';
+                    document.getElementById('country').value = savedShippingInfo.country || '';
+                    console.log("Form auto-filled with saved shipping info");
+                }
+            }
+        }
+        autoFillShippingInfo();
+
+        // Payment method toggle
+        document.getElementById('payment').addEventListener('change', (e) => {
+            const cardFields = document.getElementById('card-fields');
+            const isCardPayment = ['credit_card', 'debit_card'].includes(e.target.value);
+            cardFields.style.display = isCardPayment ? 'block' : 'none';
+        });
+
+        // Form submission
+        document.getElementById('checkout-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const user = JSON.parse(localStorage.getItem('currentUser')) || { email: 'guest' };
+            
+            // Collect shipping information
+            const shippingInfo = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                zip: document.getElementById('zip').value,
+                country: document.getElementById('country').value
+            };
+
+            // Collect payment information
+            const paymentMethod = document.getElementById('payment').value;
+            const paymentInfo = {
+                method: paymentMethod,
+                cardNumber: ['credit_card', 'debit_card'].includes(paymentMethod) ? document.getElementById('cardNumber').value : '',
+                cardLast4: ['credit_card', 'debit_card'].includes(paymentMethod) ? document.getElementById('cardNumber').value.slice(-4) : '',
+                expiry: ['credit_card', 'debit_card'].includes(paymentMethod) ? document.getElementById('expiry').value : ''
+            };
+
+            const total = cart.reduce((sum, p) => sum + (p.price * (p.quantity || 1)), 0);
+            const newOrder = {
+                orderId: "ORD-" + Math.floor(Math.random() * 1000000),
+                user: user.email,
+                items: cart,
+                total: total,
+                date: new Date().toLocaleString(),
+                shippingInfo: shippingInfo,
+                paymentInfo: paymentInfo
+            };
+
+            // Save to Database using DBManager
+            const savedOrder = DBManager.addOrder(newOrder);
+            localStorage.setItem('currentOrder', JSON.stringify(savedOrder));
+
+            // Save shipping information to user profile for future use
+            if (user.email !== 'guest') {
+                DBManager.saveUserShippingInfo(user.email, shippingInfo);
+            }
+
+            window.location.href = 'confirmation.html';
+        });
+    </script>
+</body>
+</html>

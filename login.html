@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Login - Analytics Practice Shop</title>
+</head>
+<body>
+    <nav id="global-nav">
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="plp.html">Shop</a>
+        <a href="cart.html">Cart</a>
+    </div>
+    <div class="auth-links" id="auth-ui">
+        </div>
+</nav>
+
+<script src="js/auth.js"></script>
+<script>
+    function renderNav() {
+        const authUI = document.getElementById('auth-ui');
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (user) {
+            let adminLink = user.role === 'admin' ? `<a href="admin/dashboard.html" style="color: #ff9900;">Back Office</a>` : '';
+            authUI.innerHTML = `
+                ${adminLink}
+                <span style="color: white; margin: 0 10px;">Hi, ${user.email.split('@')[0]}</span>
+                <a href="#" onclick="auth.logout()">Logout</a>
+            `;
+        } else {
+            authUI.innerHTML = `
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>
+            `;
+        }
+    }
+    renderNav();
+</script>
+
+    <div style="background: #f5f5f5; padding: 12px 0; border-bottom: 1px solid #ddd;">
+        <div class="container" style="font-size: 0.9rem; color: #666;">
+            <a href="index.html" style="color: #007185; text-decoration: none;">Home</a>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #333; font-weight: bold;">Login</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="auth-card" style="max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; color: #232f3e;">Login</h2>
+            <p style="text-align: center; font-size: 0.9rem; color: #666;">Enter your credentials to access your account.</p>
+            
+            <form style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="email" id="loginEmail" placeholder="Email" required style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <input type="password" id="loginPass" placeholder="Password" required style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <button type="button" class="btn" onclick="handleLogin()" style="width: 100%; background: #ffd814; padding: 10px;">Login</button>
+            </form>
+
+            <div style="margin-top: 20px; text-align: center; font-size: 0.9rem;">
+                Don't have an account? <a href="register.html" style="color: #007185;">Sign up</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/analytics.js"></script>
+    <script>
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+            if(auth.login(email, pass)) {
+                window.location.href = 'index.html';
+            } else {
+                alert("Invalid Credentials");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="../css/style.css">
+    <title>Inventory Management - Back Office</title>
+</head>
+<body>
+    <nav style="background: #232f3e; padding: 1rem 2rem; display: flex; gap: 20px;">
+        <a href="dashboard.html" style="color: white; text-decoration: none; font-weight: bold;">Dashboard</a>
+        <a href="../index.html" style="color: white; text-decoration: none; font-weight: bold;">Live Store</a>
+    </nav>
+
+    <div style="background: #f5f5f5; padding: 12px 0; border-bottom: 1px solid #ddd;">
+        <div class="container" style="font-size: 0.9rem; color: #666;">
+            <a href="../index.html" style="color: #007185; text-decoration: none;">Home</a>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #333; font-weight: bold;">Admin</span>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #333; font-weight: bold;">Inventory</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Inventory Management</h1>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+            <h3>Add New Product</h3>
+            <input type="text" id="newName" placeholder="Product Name" style="padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 4px;">
+            <input type="number" id="newPrice" placeholder="Price" style="padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 4px;">
+            <select id="newCat" style="padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="Electronics">Electronics</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Apparel">Apparel</option>
+                <option value="Sports">Sports</option>
+                <option value="Home">Home</option>
+            </select>
+            <button class="btn" onclick="saveNewProduct()" style="padding: 10px 20px; background: #007185; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; font-weight: bold;">Add to Database</button>
+        </div>
+
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+            <h3>Fetch Products from API</h3>
+            <p style="color: #666; margin-bottom: 15px;">Import all products from dummyjson.com to the database</p>
+            <button onclick="fetchAndImportAllProducts()" style="padding: 10px 20px; background: #FF9900; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Fetch All Products from API</button>
+            <div id="import-status" style="margin-top: 10px; display: none; padding: 10px; background: #e8f5e9; border-radius: 4px; color: #2e7d32;"></div>
+        </div>
+
+        <h3>Current Inventory (<span id="product-count">0</span> products)</h3>
+        <div style="margin-bottom: 20px;">
+            <input type="text" id="search-inventory" placeholder="Search products..." style="padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 4px;">
+            <button onclick="filterProducts()" style="padding: 10px 15px; background: #007185; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Search</button>
+        </div>
+        <div id="inventoryTable"></div>
+    </div>
+
+    <script src="../js/analytics.js"></script>
+    <script src="../js/db-manager.js"></script>
+    <script>
+        // Load inventory on page load
+        function loadInventory() {
+            const products = JSON.parse(localStorage.getItem('dummyJsonProducts') || '[]');
+            displayProducts(products);
+        }
+
+        // Display products in table format
+        function displayProducts(products) {
+            const table = document.getElementById('inventoryTable');
+            const count = document.getElementById('product-count');
+            
+            count.innerText = products.length;
+
+            if (products.length === 0) {
+                table.innerHTML = '<p style="color: #666; text-align: center; padding: 40px;">No products in inventory. Click "Fetch All Products from API" to import.</p>';
+                return;
+            }
+
+            table.innerHTML = `
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; background: white; border-collapse: collapse; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 4px;">
+                        <thead>
+                            <tr style="background: #232f3e; color: white;">
+                                <th style="padding: 12px; text-align: left;">Product ID</th>
+                                <th style="padding: 12px; text-align: left;">Title</th>
+                                <th style="padding: 12px; text-align: left;">Category</th>
+                                <th style="padding: 12px; text-align: center;">Price</th>
+                                <th style="padding: 12px; text-align: center;">Rating</th>
+                                <th style="padding: 12px; text-align: center;">Stock</th>
+                                <th style="padding: 12px; text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${products.map(p => `
+                                <tr style="border-bottom: 1px solid #eee; hover: background #f9f9f9;">
+                                    <td style="padding: 12px;">${p.id}</td>
+                                    <td style="padding: 12px;"><strong>${p.title || p.name}</strong><br><small style="color: #666;">${(p.description || '').substring(0, 50)}...</small></td>
+                                    <td style="padding: 12px;">${p.category}</td>
+                                    <td style="padding: 12px; text-align: center; font-weight: bold;">$${p.price}</td>
+                                    <td style="padding: 12px; text-align: center;">⭐ ${p.rating || 'N/A'}</td>
+                                    <td style="padding: 12px; text-align: center;">${p.stock || 'N/A'}</td>
+                                    <td style="padding: 12px; text-align: center;">
+                                        <button onclick="viewProductDetail(${p.id})" style="padding: 5px 10px; background: #007185; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 0.85rem;">View</button>
+                                        <button onclick="removeProduct(${p.id})" style="padding: 5px 10px; background: #B12704; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Remove</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Fetch all products from dummyjson API and save to localStorage
+        async function fetchAndImportAllProducts() {
+            const statusDiv = document.getElementById('import-status');
+            const button = event.target;
+            
+            button.disabled = true;
+            button.style.opacity = '0.6';
+            statusDiv.style.display = 'block';
+            statusDiv.innerText = '⏳ Fetching products from API...';
+
+            try {
+                const response = await fetch('https://dummyjson.com/products?limit=0');
+                const data = await response.json();
+                
+                if (data.products && data.products.length > 0) {
+                    // Save products to localStorage
+                    localStorage.setItem('dummyJsonProducts', JSON.stringify(data.products));
+                    
+                    statusDiv.innerText = `✅ Successfully imported ${data.products.length} products!`;
+                    statusDiv.style.background = '#e8f5e9';
+                    statusDiv.style.color = '#2e7d32';
+                    
+                    // Reload inventory display
+                    setTimeout(() => {
+                        loadInventory();
+                    }, 1000);
+                } else {
+                    throw new Error('No products found');
+                }
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                statusDiv.innerText = `❌ Error: ${error.message}. Please try again.`;
+                statusDiv.style.background = '#ffebee';
+                statusDiv.style.color = '#c62828';
+            } finally {
+                button.disabled = false;
+                button.style.opacity = '1';
+            }
+        }
+
+        // Search/filter products
+        function filterProducts() {
+            const searchTerm = document.getElementById('search-inventory').value.toLowerCase();
+            const allProducts = JSON.parse(localStorage.getItem('dummyJsonProducts') || '[]');
+            
+            const filtered = allProducts.filter(p => 
+                (p.title || p.name || '').toLowerCase().includes(searchTerm) ||
+                (p.category || '').toLowerCase().includes(searchTerm) ||
+                p.id.toString().includes(searchTerm)
+            );
+            
+            displayProducts(filtered);
+        }
+
+        // View product details
+        function viewProductDetail(productId) {
+            const allProducts = JSON.parse(localStorage.getItem('dummyJsonProducts') || '[]');
+            const product = allProducts.find(p => p.id === productId);
+            
+            if (product) {
+                alert(`
+PRODUCT DETAILS
+===============
+ID: ${product.id}
+Title: ${product.title}
+Category: ${product.category}
+Price: $${product.price}
+Rating: ${product.rating}/5
+Stock: ${product.stock}
+Description: ${product.description}
+Brand: ${product.brand || 'N/A'}
+Warranty: ${product.warrantyInformation || 'N/A'}
+                `);
+            }
+        }
+
+        // Remove product from inventory
+        function removeProduct(productId) {
+            if (confirm('Are you sure you want to remove this product from inventory?')) {
+                let products = JSON.parse(localStorage.getItem('dummyJsonProducts') || '[]');
+                products = products.filter(p => p.id !== productId);
+                localStorage.setItem('dummyJsonProducts', JSON.stringify(products));
+                loadInventory();
+            }
+        }
+
+        // Save new custom product
+        function saveNewProduct() {
+            const products = JSON.parse(localStorage.getItem('dummyJsonProducts') || '[]');
+            const newProd = {
+                id: Math.max(...products.map(p => p.id || 0), 0) + 1,
+                title: document.getElementById('newName').value,
+                price: parseInt(document.getElementById('newPrice').value),
+                category: document.getElementById('newCat').value,
+                rating: 0,
+                stock: 0,
+                description: 'Custom product added via admin',
+                thumbnail: 'https://via.placeholder.com/150',
+                images: ['https://via.placeholder.com/150']
+            };
+            
+            if (!newProd.title || !newProd.price) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            products.push(newProd);
+            localStorage.setItem('dummyJsonProducts', JSON.stringify(products));
+            
+            // Analytics: Track Admin DB changes
+            analytics.trackAction('admin_product_added', { productName: newProd.title });
+            
+            alert('Product added successfully!');
+            document.getElementById('newName').value = '';
+            document.getElementById('newPrice').value = '';
+            loadInventory();
+        }
+
+        // Load inventory on page load
+        loadInventory();
+    </script>
+</body>
+</html>

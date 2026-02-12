@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Your Cart - Analytics Practice Shop</title>
+</head>
+<body>
+    <script src="js/search.js"></script>
+
+    <nav id="global-nav" style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="plp.html">Shop</a>
+    </div>
+    <div style="flex: 1; display: flex; justify-content: center; margin: 0 20px;">
+        <input type="text" id="global-search" placeholder="Search products..." style="padding: 8px 12px; width: 300px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+        <button onclick="performGlobalSearch()" style="padding: 8px 15px; background: #FF9900; color: white; border: none; border-radius: 4px; margin-left: 5px; cursor: pointer; font-weight: bold;">Search</button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <a href="cart.html" title="Shopping Cart" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; transition: background 0.3s; text-decoration: none;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+        </a>
+        <div class="auth-links" id="auth-ui">
+        </div>
+    </div>
+</nav>
+
+<script src="js/auth.js"></script>
+<script>
+    function renderNav() {
+        const authUI = document.getElementById('auth-ui');
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (user) {
+            let adminLink = user.role === 'admin' ? `<a href="admin/dashboard.html" style="color: #ff9900;">Back Office</a>` : '';
+            authUI.innerHTML = `
+                ${adminLink}
+                <span style="color: white; margin: 0 10px;">Hi, ${user.email.split('@')[0]}</span>
+                <a href="#" onclick="auth.logout()">Logout</a>
+            `;
+        } else {
+            authUI.innerHTML = `
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>
+            `;
+        }
+    }
+    renderNav();
+</script>
+
+    <div style="background: #f5f5f5; padding: 12px 0; border-bottom: 1px solid #ddd;">
+        <div class="container" style="font-size: 0.9rem; color: #666;">
+            <a href="index.html" style="color: #007185; text-decoration: none;">Home</a>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #333; font-weight: bold;">Cart</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="banner">
+            <h1>Shopping Cart</h1>
+            <p>Review your items before proceeding to checkout.</p>
+        </header>
+
+        <div id="cart-container">
+            <div id="cart-items">
+                </div>
+
+            <div class="cart-summary" style="margin-top: 20px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                <h3>Total: $<span id="cart-total">0</span></h3>
+                <button id="checkout-btn" class="btn" style="width: 100%; margin-top: 10px; background-color: #f0c14b;">
+                    Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/analytics.js"></script>
+    <script src="js/cart-logic.js"></script>
+
+    <script>
+        /** * DATA LAYER CONFIGURATION
+         * ------------------------
+         * On this page, digitalData.cart is populated by cart-logic.js.
+         * We set the page metadata here.
+         */
+        window.digitalData.page = {
+            pageName: "shopping_cart",
+            pageType: "cart",
+            siteSection: "checkout_funnel"
+        };
+
+        // Adobe Analytics: Track the 'scView' event (Cart View)
+        analytics.trackPageView();
+
+        // Initialize the UI
+        renderCart();
+
+        // Handle Navigation to Checkout
+        document.getElementById('checkout-btn').addEventListener('click', function() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            if (cart.length > 0) {
+                // Adobe Analytics: Track click toward checkout
+                analytics.trackAction('checkout_click', { itemCount: cart.length });
+                window.location.href = 'checkout.html';
+            } else {
+                alert("Your cart is empty!");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Product Detail - Analytics Practice Shop</title>
+</head>
+<body>
+    <script src="js/search.js"></script>
+
+    <nav id="global-nav" style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="plp.html">Shop</a>
+    </div>
+    <div style="flex: 1; display: flex; justify-content: center; margin: 0 20px;">
+        <input type="text" id="global-search" placeholder="Search products..." style="padding: 8px 12px; width: 300px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+        <button onclick="performGlobalSearch()" style="padding: 8px 15px; background: #FF9900; color: white; border: none; border-radius: 4px; margin-left: 5px; cursor: pointer; font-weight: bold;">Search</button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <a href="cart.html" title="Shopping Cart" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; transition: background 0.3s; text-decoration: none;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+        </a>
+        <div class="auth-links" id="auth-ui">
+        </div>
+    </div>
+</nav>
+
+<script src="js/auth.js"></script>
+<script>
+    function renderNav() {
+        const authUI = document.getElementById('auth-ui');
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (user) {
+            let adminLink = user.role === 'admin' ? `<a href="admin/dashboard.html" style="color: #ff9900;">Back Office</a>` : '';
+            authUI.innerHTML = `
+                ${adminLink}
+                <span style="color: white; margin: 0 10px;">Hi, ${user.email.split('@')[0]}</span>
+                <a href="#" onclick="auth.logout()">Logout</a>
+            `;
+        } else {
+            authUI.innerHTML = `
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>
+            `;
+        }
+    }
+    renderNav();
+</script>
+
+    <div style="background: #f5f5f5; padding: 12px 0; border-bottom: 1px solid #ddd; margin-bottom: 20px;">
+        <div class="container" style="font-size: 0.9rem; color: #666;">
+            <a href="index.html" style="color: #007185; text-decoration: none;">Home</a>
+            <span style="margin: 0 8px;">/</span>
+            <a href="plp.html" style="color: #007185; text-decoration: none;">Shop</a>
+            <span style="margin: 0 8px;">/</span>
+            <span id="bread-current" style="color: #333; font-weight: bold;">Product</span>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <div id="pdp-content" class="pdp-layout" style="display: flex; gap: 40px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            </div>
+    </div>
+
+    <script src="js/analytics.js"></script>
+    <script src="js/cart-logic.js"></script>
+
+    <script>
+        // Get Product ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+
+        // Fetch product from dummyjson API
+        fetch(`https://dummyjson.com/products/${productId}`)
+            .then(res => res.json())
+            .then(product => {
+                if (product.id) {
+                    // Update breadcrumb
+                    document.getElementById('bread-current').innerText = product.title;
+                    
+                    // Render product details
+                    document.getElementById('pdp-content').innerHTML = `
+                        <div class="pdp-image" style="flex: 1;">
+                            <img src="${product.images[0]}" alt="${product.title}" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">
+                                ${product.images.slice(1, 4).map(img => `<img src="${img}" alt="${product.title}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer;" onclick="document.querySelector('.pdp-image img').src='${img}'">`).join('')}
+                            </div>
+                        </div>
+                        <div class="pdp-info" style="flex: 1;">
+                            <span style="color: #007185; font-weight: bold; text-transform: uppercase; font-size: 0.8rem;">${product.category}</span>
+                            <h1 style="margin: 10px 0;">${product.title}</h1>
+                            <p style="color: #FF9900; font-size: 1.1rem; margin: 10px 0;">⭐ ${product.rating.toFixed(1)} (${product.reviews.length} reviews)</p>
+                            <p style="font-size: 1.5rem; color: #B12704; font-weight: bold;">$${product.price.toFixed(2)}</p>
+                            ${product.discountPercentage ? `<p style="color: #28a745; font-weight: bold;">🏷️ ${product.discountPercentage}% OFF</p>` : ''}
+                            <p style="line-height: 1.6; color: #555; margin: 15px 0;">${product.description}</p>
+                            
+                            <p style="margin: 15px 0; color: #666;"><strong>Stock:</strong> ${product.stock > 0 ? `${product.stock} available` : 'Out of stock'}</p>
+                            
+                            <div style="margin-top: 20px;">
+                                <label>Quantity:</label>
+                                <select id="qty" style="width: 60px; margin-left: 10px; padding: 5px;">
+                                    <option>1</option><option>2</option><option>3</option><option>5</option><option>10</option>
+                                </select>
+                            </div>
+
+                            <button id="addToCart" class="btn" style="margin-top: 20px; width: 100%; padding: 12px; background: #ffd814; font-size: 1.1rem; font-weight: bold; cursor: pointer; border: none; border-radius: 4px;">Add to Cart</button>
+                        </div>
+                    `;
+
+                    // SET DATA LAYER (Important for Analytics)
+                    window.digitalData.page = {
+                        pageName: "pdp:" + product.title.toLowerCase().replace(/ /g, "_"),
+                        pageType: "pdp",
+                        category: product.category,
+                        breadcrumb: "home > shop > " + product.category.toLowerCase()
+                    };
+
+                    window.digitalData.product = [{
+                        id: product.id,
+                        name: product.title,
+                        price: product.price,
+                        category: product.category,
+                        rating: product.rating,
+                        stock: product.stock
+                    }];
+
+                    analytics.trackPageView();
+
+                    // Add to Cart Handler
+                    document.getElementById('addToCart').addEventListener('click', function() {
+                        const qty = parseInt(document.getElementById('qty').value);
+                        const cartItem = {
+                            id: product.id,
+                            name: product.title,
+                            price: product.price,
+                            category: product.category,
+                            quantity: qty,
+                            image: product.thumbnail
+                        };
+
+                        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                        let existingItem = cart.find(item => item.id === product.id);
+
+                        if (existingItem) {
+                            existingItem.quantity += qty;
+                        } else {
+                            cart.push(cartItem);
+                        }
+
+                        localStorage.setItem('cart', JSON.stringify(cart));
+                        analytics.trackAction('scAdd', { productId: product.id, productName: product.title, quantity: qty });
+                        alert(`${product.title} added to cart!`);
+                        updateCartDataLayer();
+                        
+                        // Redirect to cart page after adding product
+                        window.location.href = 'cart.html';
+                    });
+                } else {
+                    document.getElementById('pdp-content').innerHTML = '<p style="color: red; font-size: 1.2rem;">Product not found.</p>';
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching product:', err);
+                document.getElementById('pdp-content').innerHTML = '<p style="color: red; font-size: 1.2rem;">Error loading product details. Please try again.</p>';
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="css/style.css">
+    <title>Products - Analytics Shop</title>
+</head>
+<body>
+    <script src="js/search.js"></script>
+    <nav id="global-nav" style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="plp.html">Shop</a>
+    </div>
+    <div style="flex: 1; display: flex; justify-content: center; margin: 0 20px;">
+        <input type="text" id="global-search" placeholder="Search products..." style="padding: 8px 12px; width: 300px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+        <button onclick="performGlobalSearch()" style="padding: 8px 15px; background: #FF9900; color: white; border: none; border-radius: 4px; margin-left: 5px; cursor: pointer; font-weight: bold;">Search</button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <a href="cart.html" title="Shopping Cart" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; transition: background 0.3s; text-decoration: none;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+        </a>
+        <div class="auth-links" id="auth-ui">
+        </div>
+    </div>
+</nav>
+
+<script src="js/auth.js"></script>
+<script>
+    function renderNav() {
+        const authUI = document.getElementById('auth-ui');
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (user) {
+            let adminLink = user.role === 'admin' ? `<a href="admin/dashboard.html" style="color: #ff9900;">Back Office</a>` : '';
+            authUI.innerHTML = `
+                ${adminLink}
+                <span style="color: white; margin: 0 10px;">Hi, ${user.email.split('@')[0]}</span>
+                <a href="#" onclick="auth.logout()">Logout</a>
+            `;
+        } else {
+            authUI.innerHTML = `
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>
+            `;
+        }
+    }
+    renderNav();
+</script>
+    <div style="background: #f5f5f5; padding: 12px 0; border-bottom: 1px solid #ddd; margin-bottom: 20px;">
+        <div class="container" style="font-size: 0.9rem; color: #666;">
+            <a href="index.html" style="color: #007185; text-decoration: none;">Home</a>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #333; font-weight: bold;">Shop</span>
+        </div>
+    </div>
+
+    <h2>Our Products</h2>
+    <div id="product-list" style="text-align: center; padding: 40px; color: #666;">Loading products...</div>
+
+    <script src="js/analytics.js"></script>
+    <script>
+        digitalData.page = { pageName: "product_listing", pageType: "plp" };
+        
+        // Check if we're in search mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const isSearchMode = urlParams.get('search') === 'true';
+        
+        if (isSearchMode) {
+            // Display search results
+            displaySearchResults();
+        } else {
+            // Normal PLP - load all products
+            fetch('https://dummyjson.com/products')
+                .then(res => res.json())
+                .then(data => {
+                    const listDiv = document.getElementById('product-list');
+                    const products = data.products.slice(0, 12);
+                    
+                    listDiv.innerHTML = '';
+                    listDiv.style.display = 'grid';
+                    listDiv.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+                    listDiv.style.gap = '20px';
+                    
+                    products.forEach(p => {
+                        const productCard = document.createElement('div');
+                        productCard.innerHTML = `
+                            <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                <img src="${p.thumbnail}" alt="${p.title}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">
+                                <h3 style="margin: 10px 0; font-size: 1rem;">${p.title}</h3>
+                                <p style="color: #666; font-size: 0.9rem; margin: 8px 0;">${p.description.substring(0, 60)}...</p>
+                                <p style="font-size: 1.3rem; color: #B12704; font-weight: bold; margin: 10px 0;">$${p.price.toFixed(2)}</p>
+                                <p style="color: #FF9900; font-size: 0.9rem; margin: 5px 0;">⭐ ${p.rating.toFixed(1)}</p>
+                                <a href="pdp.html?id=${p.id}" onclick="analytics.trackAction('product_click', {id: '${p.id}', title: '${p.title}'})" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: #007185; color: white; text-decoration: none; border-radius: 4px; cursor: pointer;">View Details</a>
+                            </div>
+                        `;
+                        listDiv.appendChild(productCard);
+                    });
+                    
+                    analytics.trackPageView();
+                })
+                .catch(err => {
+                    console.error('Error fetching products:', err);
+                    document.getElementById('product-list').innerHTML = '<p style="color: red;">Error loading products. Please try again later.</p>';
+                });
+        }
+    </script>
+</body>
+</html>

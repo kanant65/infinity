@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Create Account - Analytics Practice Shop</title>
+</head>
+<body>
+
+    <nav id="global-nav">
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="plp.html">Shop</a>
+        <a href="cart.html">Cart</a>
+    </div>
+    <div class="auth-links" id="auth-ui">
+        </div>
+</nav>
+
+<script src="js/auth.js"></script>
+<script>
+    function renderNav() {
+        const authUI = document.getElementById('auth-ui');
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (user) {
+            let adminLink = user.role === 'admin' ? `<a href="admin/dashboard.html" style="color: #ff9900;">Back Office</a>` : '';
+            authUI.innerHTML = `
+                ${adminLink}
+                <span style="color: white; margin: 0 10px;">Hi, ${user.email.split('@')[0]}</span>
+                <a href="#" onclick="auth.logout()">Logout</a>
+            `;
+        } else {
+            authUI.innerHTML = `
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>
+            `;
+        }
+    }
+    renderNav();
+</script>
+
+    <div style="background: #f5f5f5; padding: 12px 0; border-bottom: 1px solid #ddd;">
+        <div class="container" style="font-size: 0.9rem; color: #666;">
+            <a href="index.html" style="color: #007185; text-decoration: none;">Home</a>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #333; font-weight: bold;">Register</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="auth-card" style="max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; color: #232f3e;">Create Account</h2>
+            <p style="text-align: center; font-size: 0.9rem; color: #666;">Join us to practice advanced tracking.</p>
+            
+            <form id="registerForm">
+                <div style="margin-bottom: 15px;">
+                    <label>Email Address</label>
+                    <input type="email" id="regEmail" required placeholder="name@example.com">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label>Password</label>
+                    <input type="password" id="regPass" required placeholder="At least 6 characters">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label>Account Type</label>
+                    <select id="regRole">
+                        <option value="user">Standard User</option>
+                        <option value="admin">Admin (Back Office Access)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; background: #ffd814; margin-top: 10px;">
+                    Create Your Account
+                </button>
+            </form>
+
+            <div style="margin-top: 20px; text-align: center; font-size: 0.9rem;">
+                Already have an account? <a href="login.html" style="color: #007185;">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/analytics.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+        // 1. Set Page Data Layer
+        window.digitalData.page = {
+            pageName: "registration_form",
+            pageType: "auth",
+            siteSection: "account_creation"
+        };
+
+        // Adobe Analytics: Track the load of the registration form
+        analytics.trackPageView();
+
+        // 2. Handle Form Submission
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPass').value;
+            const role = document.getElementById('regRole').value;
+
+            // Simple validation
+            if (password.length < 6) {
+                // QA Practice: Track Form Errors (eVar for error message)
+                analytics.trackAction('form_error', { message: 'Password too short' });
+                alert("Password must be at least 6 characters.");
+                return;
+            }
+
+            // Save to simulated database (LocalStorage)
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            // Check if user exists
+            if (users.find(u => u.email === email)) {
+                alert("User already exists!");
+                return;
+            }
+
+            users.push({ email, password, role });
+            localStorage.setItem('users', JSON.stringify(users));
+
+            /**
+             * ADOBE ANALYTICS: CONVERSION TRACKING
+             * ------------------------------------
+             * This is a "Success Event". We capture the role to see 
+             * which type of accounts are being created most often.
+             */
+            analytics.trackAction('registration_complete', { 
+                userRole: role,
+                emailDomain: email.split('@')[1] 
+            });
+
+            alert("Account created successfully! Please login.");
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>

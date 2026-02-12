@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Order Confirmed - Analytics Practice Shop</title>
+</head>
+<body>
+
+    <nav id="global-nav">
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="plp.html">Shop</a>
+        <a href="cart.html">Cart</a>
+    </div>
+    <div class="auth-links" id="auth-ui">
+        </div>
+</nav>
+
+<script src="js/auth.js"></script>
+<script>
+    function renderNav() {
+        const authUI = document.getElementById('auth-ui');
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (user) {
+            let adminLink = user.role === 'admin' ? `<a href="admin/dashboard.html" style="color: #ff9900;">Back Office</a>` : '';
+            authUI.innerHTML = `
+                ${adminLink}
+                <span style="color: white; margin: 0 10px;">Hi, ${user.email.split('@')[0]}</span>
+                <a href="#" onclick="auth.logout()">Logout</a>
+            `;
+        } else {
+            authUI.innerHTML = `
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>
+            `;
+        }
+    }
+    renderNav();
+</script>
+
+    <div style="background: #f5f5f5; padding: 12px 0; border-bottom: 1px solid #ddd;">
+        <div class="container" style="font-size: 0.9rem; color: #666;">
+            <a href="index.html" style="color: #007185; text-decoration: none;">Home</a>
+            <span style="margin: 0 8px;">/</span>
+            <span style="color: #333; font-weight: bold;">Order Confirmation</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div style="background: linear-gradient(135deg, #007185 0%, #00a8cc 100%); padding: 40px 20px; border-radius: 8px; color: white; text-align: center; margin-bottom: 30px;">
+            <h1 style="margin: 0 0 10px 0; font-size: 2.5rem;">✓ Order Confirmed</h1>
+            <p style="margin: 0; font-size: 1.1rem;">Thank you for your purchase! Your order is being processed.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 40px;">
+            <!-- Main Content -->
+            <div>
+                <!-- Order Status Section -->
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <h2 style="color: #232f3e; margin-bottom: 15px; border-bottom: 2px solid #FF9900; padding-bottom: 10px;">Order #<span id="order-id-display"></span></h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px;">
+                        <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 4px;">
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Order Date</p>
+                            <p style="margin: 5px 0 0 0; font-weight: bold;" id="order-date"></p>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 4px;">
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Estimated Delivery</p>
+                            <p style="margin: 5px 0 0 0; font-weight: bold;" id="est-delivery"></p>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 4px;">
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Order Status</p>
+                            <p style="margin: 5px 0 0 0; font-weight: bold; color: #007185;">Processing</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items Section -->
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <h3 style="color: #232f3e; margin-bottom: 15px; border-bottom: 2px solid #FF9900; padding-bottom: 10px;">Items Ordered</h3>
+                    <div id="order-items-display" style="margin-top: 15px;"></div>
+                    <div style="border-top: 2px solid #ddd; padding-top: 15px; margin-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: bold; color: #B12704;">
+                            <span>Order Total:</span>
+                            <span>$<span id="total-display">0</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Address Section -->
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <h3 style="color: #232f3e; margin-bottom: 15px; border-bottom: 2px solid #FF9900; padding-bottom: 10px;">Shipping Address</h3>
+                    <div id="shipping-info-display" style="margin-top: 15px; line-height: 1.8;">
+                        <p style="margin: 0;"><strong id="shipping-name"></strong></p>
+                        <p style="margin: 0;" id="shipping-address"></p>
+                        <p style="margin: 0;" id="shipping-city-state"></p>
+                        <p style="margin: 0;" id="shipping-country"></p>
+                        <p style="margin: 5px 0 0 0; color: #666;"><strong>Phone:</strong> <span id="shipping-phone"></span></p>
+                    </div>
+                </div>
+
+                <!-- Payment Information Section -->
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <h3 style="color: #232f3e; margin-bottom: 15px; border-bottom: 2px solid #FF9900; padding-bottom: 10px;">Payment Method</h3>
+                    <div id="payment-info-display" style="margin-top: 15px;">
+                        <p style="margin: 0;"><strong id="payment-method"></strong></p>
+                        <p style="margin: 5px 0 0 0; color: #666;" id="payment-details"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div>
+                <!-- Confirmation Email -->
+                <div style="background: #f0f7ff; padding: 20px; border-radius: 8px; border-left: 4px solid #007185; margin-bottom: 20px;">
+                    <h4 style="color: #007185; margin-top: 0;">📧 Confirmation Email</h4>
+                    <p style="margin: 10px 0 0 0; font-size: 0.9rem; color: #333;">A confirmation email with order details has been sent to <strong id="order-email"></strong></p>
+                </div>
+
+                <!-- What's Next -->
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <h4 style="color: #232f3e; margin-top: 0;">What's Next?</h4>
+                    <ul style="margin: 10px 0; padding-left: 20px; font-size: 0.9rem;">
+                        <li>We'll send you a tracking number via email</li>
+                        <li>Items will be prepared for shipment</li>
+                        <li>Estimated delivery in 3-5 business days</li>
+                    </ul>
+                </div>
+
+                <!-- Actions -->
+                <div style="display: flex; gap: 10px; flex-direction: column;">
+                    <a href="plp.html" class="btn" style="text-align: center; padding: 12px; background: #FF9900; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">Continue Shopping</a>
+                    <a href="index.html" class="btn" style="text-align: center; padding: 12px; background: #232f3e; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/analytics.js"></script>
+    <script src="js/cart-logic.js"></script>
+    <script src="js/db-manager.js"></script>
+
+    <script>
+        /**
+         * ORDER CONFIRMATION DISPLAY LOGIC
+         * --------------------------------
+         * Retrieve order details from localStorage and populate all sections
+         */
+        
+        // Get the current order from localStorage
+        const currentOrder = JSON.parse(localStorage.getItem('currentOrder'));
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+        if (currentOrder) {
+            // Display Order ID and Date
+            document.getElementById('order-id-display').innerText = currentOrder.orderId;
+            
+            const orderDate = new Date(currentOrder.date);
+            const deliveryDate = new Date(orderDate.getTime() + 5 * 24 * 60 * 60 * 1000); // 5 days later
+            
+            document.getElementById('order-date').innerText = orderDate.toLocaleDateString();
+            document.getElementById('est-delivery').innerText = deliveryDate.toLocaleDateString();
+
+            // Display Order Items with Quantities
+            const itemsDisplay = document.getElementById('order-items-display');
+            const itemsHTML = currentOrder.items.map(item => {
+                const quantity = item.quantity || 1;
+                const itemTotal = item.price * quantity;
+                return `
+                    <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee;">
+                        <div>
+                            <strong>${item.name}</strong><br>
+                            <small style="color: #666;">Quantity: ${quantity} × $${item.price.toFixed(2)}</small>
+                        </div>
+                        <div style="font-weight: bold; text-align: right;">$${itemTotal.toFixed(2)}</div>
+                    </div>
+                `;
+            }).join('');
+            itemsDisplay.innerHTML = itemsHTML;
+
+            // Display Order Total
+            const total = currentOrder.items.reduce((sum, p) => sum + (p.price * (p.quantity || 1)), 0);
+            document.getElementById('total-display').innerText = total.toFixed(2);
+
+            // Display Shipping Information
+            if (currentOrder.shippingInfo) {
+                const shipping = currentOrder.shippingInfo;
+                document.getElementById('shipping-name').innerText = shipping.fullName;
+                document.getElementById('shipping-address').innerText = shipping.address;
+                document.getElementById('shipping-city-state').innerText = `${shipping.city}, ${shipping.state} ${shipping.zip}`;
+                document.getElementById('shipping-country').innerText = shipping.country;
+                document.getElementById('shipping-phone').innerText = shipping.phone;
+                document.getElementById('order-email').innerText = shipping.email;
+            }
+
+            // Display Payment Information
+            if (currentOrder.paymentInfo) {
+                const payment = currentOrder.paymentInfo;
+                const methodLabel = {
+                    'credit_card': 'Credit Card',
+                    'debit_card': 'Debit Card',
+                    'paypal': 'PayPal',
+                    'apple_pay': 'Apple Pay',
+                    'google_pay': 'Google Pay',
+                    'boyfriend': 'Boyfriend'
+                };
+                
+                document.getElementById('payment-method').innerText = methodLabel[payment.method] || payment.method;
+                
+                if (['credit_card', 'debit_card'].includes(payment.method)) {
+                    document.getElementById('payment-details').innerText = `Ending in ${payment.cardLast4}`;
+                } else {
+                    document.getElementById('payment-details').innerText = 'Transaction confirmed';
+                }
+            }
+
+            // Adobe Analytics: Update Data Layer with Order Information
+            window.digitalData.page = {
+                pageName: "order_confirmation",
+                pageType: "confirmation",
+                siteSection: "purchase_complete"
+            };
+
+            window.digitalData.transaction = {
+                purchaseID: currentOrder.orderId,
+                totalAmount: total,
+                currency: "USD",
+                products: currentOrder.items.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity || 1
+                }))
+            };
+
+            // Fire Adobe Analytics Purchase Event
+            analytics.trackPageView();
+
+            // Clear Cart and Current Order after display
+            localStorage.removeItem('cart');
+        } else {
+            // Redirect to home if no order found
+            document.querySelector('.container').innerHTML = '<p style="color: #B12704; font-weight: bold;">No order found. <a href="index.html">Return to home</a></p>';
+        }
+    </script>
+</body>
+</html> 
