@@ -50,7 +50,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
     </div>
 </nav>
-
+window.dataLayer = window.dataLayer || [];
+window.dataLayer.push({
+  'event': 'page_view',
+  'page': {
+    'pageName': 'home page',
+    'pageTitle': 'Welcome to Our E-commerce Store',
+    'pageType': 'home',
+    'language': 'en-US',
+    'region': 'North America'
+  },
+    'device': {
+        'deviceType': 'desktop'
+    }
+});
 <script src="js/auth.js"></script>
 <script>
     function renderNav() {
