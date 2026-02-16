@@ -8,3 +8,6 @@ __pycache__/
 .idea/
 dist/
 build/
+
+# Deployment credentials
+ftp-simple.json
