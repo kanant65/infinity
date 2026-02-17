@@ -1,24 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-P7W4HKLP');</script>
-<!-- End Google Tag Manager -->
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-9Z0FHZN03D"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-9Z0FHZN03D');
-</script>
-    <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
     <title>Home - Analytics Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+            'event': 'page_view',
+            'page': {
+                'pageName': 'home page',
+                'pageTitle': 'Welcome to Our E-commerce Store',
+                'pageType': 'home',
+                'language': 'en-US',
+                'region': 'North America'
+            },
+            'device': {
+                'deviceType': 'desktop'
+            }
+        });
+
+        // Initialize digitalData if you are using Adobe's W3C standard
+        window.digitalData = window.digitalData || {};
+    </script>
+
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-P7W4HKLP');</script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9Z0FHZN03D"></script>
+    <script>
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-9Z0FHZN03D');
+    </script>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -50,20 +68,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
     </div>
 </nav>
-window.dataLayer = window.dataLayer || [];
-window.dataLayer.push({
-  'event': 'page_view',
-  'page': {
-    'pageName': 'home page',
-    'pageTitle': 'Welcome to Our E-commerce Store',
-    'pageType': 'home',
-    'language': 'en-US',
-    'region': 'North America'
-  },
-    'device': {
-        'deviceType': 'desktop'
-    }
-});
+
 <script src="js/auth.js"></script>
 <script>
     function renderNav() {
