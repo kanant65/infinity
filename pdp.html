@@ -138,7 +138,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <div class="pdp-info" style="flex: 1;">
                             <span style="color: #007185; font-weight: bold; text-transform: uppercase; font-size: 0.8rem;">${product.category}</span>
                             <h1 style="margin: 10px 0;">${product.title}</h1>
-                            <p style="color: #FF9900; font-size: 1.1rem; margin: 10px 0;">⭐ ${product.rating.toFixed(1)} (${product.reviews.length} reviews)</p>
+                            <p style="color: #FF9900; font-size: 1.1rem; margin: 10px 0;">⭐ ⭐ ${product.rating.toFixed(1)} (${product.reviews?.length || 0} reviews)</p>
                             <p style="font-size: 1.5rem; color: #B12704; font-weight: bold;">$${product.price.toFixed(2)}</p>
                             ${product.discountPercentage ? `<p style="color: #28a745; font-weight: bold;">🏷️ ${product.discountPercentage}% OFF</p>` : ''}
                             <p style="line-height: 1.6; color: #555; margin: 15px 0;">${product.description}</p>
