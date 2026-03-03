@@ -104,7 +104,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <script src="js/analytics.js"></script>
     <script>
-        digitalData.page = { pageName: "product_listing", pageType: "plp" };
+        window.digitalData = window.digitalData || {}; 
+digitalData.page = { pageName: "product_listing", pageType: "plp" };
         
         // Check if we're in search mode
         const urlParams = new URLSearchParams(window.location.search);
@@ -115,38 +116,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             displaySearchResults();
         } else {
             // Normal PLP - load all products
-            fetch('https://dummyjson.com/products')
-                .then(res => res.json())
-                .then(data => {
-                    const listDiv = document.getElementById('product-list');
-                    const products = data.products.slice(0, 12);
-                    
-                    listDiv.innerHTML = '';
-                    listDiv.style.display = 'grid';
-                    listDiv.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
-                    listDiv.style.gap = '20px';
-                    
-                    products.forEach(p => {
-                        const productCard = document.createElement('div');
-                        productCard.innerHTML = `
-                            <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                <img src="${p.thumbnail}" alt="${p.title}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">
-                                <h3 style="margin: 10px 0; font-size: 1rem;">${p.title}</h3>
-                                <p style="color: #666; font-size: 0.9rem; margin: 8px 0;">${p.description.substring(0, 60)}...</p>
-                                <p style="font-size: 1.3rem; color: #B12704; font-weight: bold; margin: 10px 0;">$${p.price.toFixed(2)}</p>
-                                <p style="color: #FF9900; font-size: 0.9rem; margin: 5px 0;">⭐ ${p.rating.toFixed(1)}</p>
-                                <a href="pdp.html?id=${p.id}" onclick="analytics.trackAction('product_click', {id: '${p.id}', title: '${p.title}'})" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: #007185; color: white; text-decoration: none; border-radius: 4px; cursor: pointer;">View Details</a>
-                            </div>
-                        `;
-                        listDiv.appendChild(productCard);
-                    });
-                    
-                    analytics.trackPageView();
-                })
-                .catch(err => {
-                    console.error('Error fetching products:', err);
-                    document.getElementById('product-list').innerHTML = '<p style="color: red;">Error loading products. Please try again later.</p>';
-                });
+            fetch(`https://dummyjson.com/products/${productId}`)
+    .then(res => res.json())
+    .then(product => {
+        // ... your code to display the product ...
+
+        // SAFE ANALYTICS CALL
+        // Check if 'analytics' exists before calling it
+        if (typeof analytics !== 'undefined') {
+            analytics.trackProductView(product);
+        } else {
+            console.warn("Analytics.js not loaded, but product data is fine.");
+        }
+    })
+    .catch(err => {
+        console.error('Error fetching product:', err);
+        // This is where your "Error loading product details" message comes from
+    });
         }
     </script>
 </body>
