@@ -130,12 +130,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     // Render product details
                     document.getElementById('pdp-content').innerHTML = `
                         <div class="pdp-image" style="flex: 1;">
-                            ${product.images.slice(1, 4).map(img => `
-  <img src="${img}" 
-       alt="${product.title}" 
-       style="width:100%;height:100px;object-fit:cover;border-radius:4px;cursor:pointer;"
-       class="thumb-img">
-`).join('')}
+                            <img src="${product.images[0]}" alt="${product.title}" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">
                                 ${product.images.slice(1, 4).map(img => `<img src="${img}" alt="${product.title}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer;" onclick="document.querySelector('.pdp-image img').src='${img}'">`).join('')}
                             </div>
@@ -143,7 +138,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <div class="pdp-info" style="flex: 1;">
                             <span style="color: #007185; font-weight: bold; text-transform: uppercase; font-size: 0.8rem;">${product.category}</span>
                             <h1 style="margin: 10px 0;">${product.title}</h1>
-                            <p style="color: #FF9900; font-size: 1.1rem; margin: 10px 0;">⭐ ⭐ ${product.rating.toFixed(1)} (${product.reviews?.length || 0} reviews)</p>
+                            <p style="color: #FF9900; font-size: 1.1rem; margin: 10px 0;">⭐ ${product.rating.toFixed(1)} (${product.reviews.length} reviews)</p>
                             <p style="font-size: 1.5rem; color: #B12704; font-weight: bold;">$${product.price.toFixed(2)}</p>
                             ${product.discountPercentage ? `<p style="color: #28a745; font-weight: bold;">🏷️ ${product.discountPercentage}% OFF</p>` : ''}
                             <p style="line-height: 1.6; color: #555; margin: 15px 0;">${product.description}</p>
