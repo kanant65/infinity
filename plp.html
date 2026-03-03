@@ -108,64 +108,60 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p id="loading-msg">Loading product details...</p>
 </div>
 
-<script>
-    // 1. Initialize digitalData safely
-    window.digitalData = window.digitalData || {};
-    
-    // 2. Get Product ID from the URL (e.g., pdp.html?id=11)
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
+<div class="container">
+        <h2 style="margin: 20px 0;">Our Products</h2>
+        <div id="product-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding-bottom: 50px;">
+            <p id="loading-msg">Loading products...</p>
+        </div>
+    </div>
 
-    if (!productId) {
-        document.getElementById('product-details').innerHTML = '<p style="color:red;">No Product ID found in URL.</p>';
-    } else {
-        // 3. Fetch the SPECIFIC product
-        fetch(`https://dummyjson.com/products/${productId}`)
+    <script src="js/analytics.js"></script>
+
+    <script>
+        // 2. Initialize Adobe Analytics Data Layer
+        window.digitalData = window.digitalData || {}; 
+        digitalData.page = { 
+            pageName: "product_listing", 
+            pageType: "plp" 
+        };
+
+        // 3. Fetch THE LIST of products (No ID needed here)
+        fetch('https://dummyjson.com/products')
             .then(res => {
-                if (!res.ok) throw new Error("Product not found");
+                if (!res.ok) throw new Error("Could not connect to API");
                 return res.json();
             })
-            .then(product => {
-                // Update digitalData for Adobe Analytics
-                digitalData.page = { 
-                    pageName: "product_detail:" + product.title, 
-                    pageType: "pdp" 
-                };
-                digitalData.product = [{
-                    id: product.id,
-                    name: product.title,
-                    price: product.price
-                }];
+            .then(data => {
+                const listDiv = document.getElementById('product-list');
+                const products = data.products.slice(0, 20); // Get 20 products
+                
+                listDiv.innerHTML = ''; // Clear the "Loading..." message
 
-                // 4. Render Product to UI
-                const detailDiv = document.getElementById('product-details');
-                detailDiv.innerHTML = `
-                    <div style="display: flex; gap: 40px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <div style="flex: 1;">
-                            <img src="${product.thumbnail}" style="width: 100%; border-radius: 8px;">
-                        </div>
-                        <div style="flex: 1;">
-                            <h1 style="margin-top: 0;">${product.title}</h1>
-                            <p style="color: #666; line-height: 1.6;">${product.description}</p>
-                            <p style="font-size: 2rem; color: #B12704; font-weight: bold;">$${product.price}</p>
-                            <p style="color: #FF9900;">⭐ ${product.rating} / 5</p>
-                            <button onclick="alert('Added to cart!')" style="padding: 12px 30px; background: #FF9900; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Add to Cart</button>
-                        </div>
-                    </div>
-                `;
+                products.forEach(p => {
+                    const card = document.createElement('div');
+                    card.style.cssText = "background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid #eee;";
+                    
+                    // The link below passes the ID to the PDP page
+                    card.innerHTML = `
+                        <img src="${p.thumbnail}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 5px;">
+                        <h3 style="font-size: 1rem; margin: 10px 0; min-height: 40px;">${p.title}</h3>
+                        <p style="font-size: 1.2rem; color: #B12704; font-weight: bold;">$${p.price}</p>
+                        <a href="pdp.html?id=${p.id}" style="display: block; text-align: center; padding: 10px; background: #007185; color: white; text-decoration: none; border-radius: 4px; margin-top: 10px; font-weight: bold;">View Product</a>
+                    `;
+                    listDiv.appendChild(card);
+                });
 
-                // 5. SAFE ANALYTICS CALL (Fixes the ReferenceError)
-                if (typeof analytics !== 'undefined' && analytics.trackProductView) {
-                    analytics.trackProductView(product);
-                } else {
-                    console.warn("Analytics object not defined. Product loaded anyway.");
+                // 4. Safe Analytics Call
+                if (typeof analytics !== 'undefined' && analytics.trackPageView) {
+                    analytics.trackPageView();
                 }
             })
             .catch(err => {
-                console.error("Error:", err);
-                document.getElementById('product-details').innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+                console.error('PLP Error:', err);
+                document.getElementById('product-list').innerHTML = `<p style="color: red;">Failed to load products. Error: ${err.message}</p>`;
             });
-    }
-</script>
+    </script>
+</body>
+</html>
 </body>
 </html>
