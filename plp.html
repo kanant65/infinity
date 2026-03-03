@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" href="data:,">
     <script>
 window.digitalData = window.digitalData || {};
 </script>
@@ -103,37 +104,68 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="product-list" style="text-align: center; padding: 40px; color: #666;">Loading products...</div>
 
     <script src="js/analytics.js"></script>
-    <script>
-        window.digitalData = window.digitalData || {}; 
-digitalData.page = { pageName: "product_listing", pageType: "plp" };
-        
-        // Check if we're in search mode
-        const urlParams = new URLSearchParams(window.location.search);
-        const isSearchMode = urlParams.get('search') === 'true';
-        
-        if (isSearchMode) {
-            // Display search results
-            displaySearchResults();
-        } else {
-            // Normal PLP - load all products
-            fetch(`https://dummyjson.com/products/${productId}`)
-    .then(res => res.json())
-    .then(product => {
-        // ... your code to display the product ...
+<div id="product-details" class="container" style="margin-top: 50px; min-height: 400px;">
+    <p id="loading-msg">Loading product details...</p>
+</div>
 
-        // SAFE ANALYTICS CALL
-        // Check if 'analytics' exists before calling it
-        if (typeof analytics !== 'undefined') {
-            analytics.trackProductView(product);
-        } else {
-            console.warn("Analytics.js not loaded, but product data is fine.");
-        }
-    })
-    .catch(err => {
-        console.error('Error fetching product:', err);
-        // This is where your "Error loading product details" message comes from
-    });
-        }
-    </script>
+<script>
+    // 1. Initialize digitalData safely
+    window.digitalData = window.digitalData || {};
+    
+    // 2. Get Product ID from the URL (e.g., pdp.html?id=11)
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    if (!productId) {
+        document.getElementById('product-details').innerHTML = '<p style="color:red;">No Product ID found in URL.</p>';
+    } else {
+        // 3. Fetch the SPECIFIC product
+        fetch(`https://dummyjson.com/products/${productId}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Product not found");
+                return res.json();
+            })
+            .then(product => {
+                // Update digitalData for Adobe Analytics
+                digitalData.page = { 
+                    pageName: "product_detail:" + product.title, 
+                    pageType: "pdp" 
+                };
+                digitalData.product = [{
+                    id: product.id,
+                    name: product.title,
+                    price: product.price
+                }];
+
+                // 4. Render Product to UI
+                const detailDiv = document.getElementById('product-details');
+                detailDiv.innerHTML = `
+                    <div style="display: flex; gap: 40px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div style="flex: 1;">
+                            <img src="${product.thumbnail}" style="width: 100%; border-radius: 8px;">
+                        </div>
+                        <div style="flex: 1;">
+                            <h1 style="margin-top: 0;">${product.title}</h1>
+                            <p style="color: #666; line-height: 1.6;">${product.description}</p>
+                            <p style="font-size: 2rem; color: #B12704; font-weight: bold;">$${product.price}</p>
+                            <p style="color: #FF9900;">⭐ ${product.rating} / 5</p>
+                            <button onclick="alert('Added to cart!')" style="padding: 12px 30px; background: #FF9900; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Add to Cart</button>
+                        </div>
+                    </div>
+                `;
+
+                // 5. SAFE ANALYTICS CALL (Fixes the ReferenceError)
+                if (typeof analytics !== 'undefined' && analytics.trackProductView) {
+                    analytics.trackProductView(product);
+                } else {
+                    console.warn("Analytics object not defined. Product loaded anyway.");
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                document.getElementById('product-details').innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+            });
+    }
+</script>
 </body>
 </html>
