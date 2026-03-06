@@ -174,6 +174,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     }];
 
                     analytics.trackPageView();
+                    // GA4 view_item event
+                    window.dataLayer = window.dataLayer || [];
+                    window.dataLayer.push({
+                        event: "view_item",
+                        ecommerce: {
+                            currency: "USD",
+                            value: product.price,
+                            items: [{
+                                item_id: product.id,
+                                item_name: product.title,
+                                item_category: product.category,
+                                item_brand: product.brand,
+                                price: product.price,
+                                item_list_name: "Product Detail Page"
+                            }]
+                        }
+                    });
 
                     // Add to Cart Handler
                     document.getElementById('addToCart').addEventListener('click', function() {
@@ -200,6 +217,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         analytics.trackAction('scAdd', { productId: product.id, productName: product.title, quantity: qty });
                         alert(`${product.title} added to cart!`);
                         updateCartDataLayer();
+                        // GA4 add_to_cart event
+                            window.dataLayer.push({
+                                event: "add_to_cart",
+                                ecommerce: {
+                                    currency: "USD",
+                                    value: product.price * qty,
+                                    items: [{
+                                        item_id: product.id,
+                                        item_name: product.title,
+                                        item_category: product.category,
+                                        item_brand: product.brand,
+                                        price: product.price,
+                                        quantity: qty
+                                    }]
+                                }
+                            });
                         
                         // Redirect to cart page after adding product
                         window.location.href = 'cart.html';

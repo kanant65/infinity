@@ -134,7 +134,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             .then(data => {
                 const listDiv = document.getElementById('product-list');
                 const products = data.products.slice(0, 20); // Get 20 products
-                
+                // GA4 view_item_list event
+                    window.dataLayer = window.dataLayer || [];
+                    window.dataLayer.push({
+                        event: "view_item_list",
+                        ecommerce: {
+                            item_list_name: "Product Listing",
+                            items: products.map((p, index) => ({
+                                item_id: p.id,
+                                item_name: p.title,
+                                item_category: p.category,
+                                item_brand: p.brand,
+                                price: p.price,
+                                index: index + 1
+                            }))
+                        }
+                    });
                 listDiv.innerHTML = ''; // Clear the "Loading..." message
 
                 products.forEach(p => {
